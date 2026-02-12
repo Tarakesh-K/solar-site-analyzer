@@ -78,8 +78,8 @@ class SiteUploadView(APIView):
             # This replaces steps 1 through 5 in your original code
             data = get_filtered_site_data(
                 request=request, 
-                model=Sites, 
-                serializer_class=SiteListSerializer
+                model=SitesWithScores, 
+                serializer_class=SiteWithScoreSerializer
             )
             
             return Response(data, status=status.HTTP_200_OK)
@@ -256,7 +256,7 @@ class SiteExportSummary(APIView):
     def get(self, request):
         try:
             # Get your data using your common function
-            data = get_filtered_site_data(request, SitesWithScores, SiteListSerializer)
+            data = get_filtered_site_data(request, SitesWithScores, SiteWithScoreSerializer)
 
             return export_to_csv_response(data, filename="solar_sites_summary.csv")
 
