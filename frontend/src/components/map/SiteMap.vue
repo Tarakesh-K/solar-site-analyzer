@@ -34,12 +34,23 @@ const attribution = import.meta.env.VITE_SITE_MAP_ATTRIBUTION
         :fill-opacity="0.8"
       >
         <l-popup>
-          <h3 class="font-bold" :style="{ color: getScoreColor(site.total_suitability_score) }">
-            {{ site.site_name }}
-          </h3>
-          <p>
-            Suitability: <strong>{{ site.total_suitability_score }}%</strong>
-          </p>
+          <div class="space-y-1">
+            <h3 class="font-bold" :style="{ color: getScoreColor(site.total_suitability_score) }">
+              {{ site.site_name }}
+            </h3>
+            <p>
+              Suitability:
+              <strong>{{ site.total_suitability_score }}%</strong>
+            </p>
+            <p>
+              Latitude:
+              <strong>{{ site.latitude }}</strong>
+            </p>
+            <p>
+              Longitude:
+              <strong>{{ site.longitude }}</strong>
+            </p>
+          </div>
         </l-popup>
       </l-circle-marker>
     </l-map>

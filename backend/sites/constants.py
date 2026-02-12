@@ -3,7 +3,7 @@ ALLOWED_QUERY_PARAMS_FOR_SITE = {
     "min_score",
     "max_score",
     "score",
-    "export"
+    "export",
     "prefix",
     "limit",
     "offset",

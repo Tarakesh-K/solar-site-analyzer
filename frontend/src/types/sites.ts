@@ -1,3 +1,5 @@
+import type { FilterMode } from '@/types/header'
+
 export type Sites = {
   site_id: number
   site_name: string
@@ -35,4 +37,25 @@ export type SiteWithScores = {
   infrastructure_score: number
   total_suitability_score: number
   analysis_timestamp: Date
+}
+
+export type NumericSiteColumns = {
+  [K in keyof SiteWithScores]: SiteWithScores[K] extends number ? K : never
+}[keyof SiteWithScores]
+
+export type SiteWithScoreFilter = {
+  rangeExactFilter?: RangeExactFilter[]
+  site_name?: string | null
+  land_type?: string | null
+  region?: string | null
+  limit?: number | null
+  offset?: number | null
+}
+
+export type RangeExactFilter = {
+  col: NumericSiteColumns
+  max_score?: number | null
+  min_score?: number | null
+  score?: number | null
+  mode?: FilterMode
 }

@@ -23,5 +23,7 @@ export function useMapLogic() {
     error,
     getScoreColor: siteStore.getScoreColor, // Pass the function through
     refresh: siteStore.fetchSites,
+    mapFilters: siteStore.mapFilters,
+    setMapFilterValue: siteStore.setMapFilterValue,
   }
 }
