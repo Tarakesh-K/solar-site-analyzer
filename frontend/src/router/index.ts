@@ -15,6 +15,12 @@ const router = createRouter({
       // TRULY LAZY LOADED: Only downloads when user clicks "Dashboard"
       component: () => import('@/components/dashboard/DashboardView.vue'),
     },
+    {
+      path: '/analyze',
+      name: 'analyze',
+      // TRULY LAZY LOADED: Only downloads when user clicks "Dashboard"
+      component: () => import('@/components/analyze/AnalyzeView.vue'),
+    },
   ],
 })
 

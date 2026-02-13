@@ -1,7 +1,7 @@
 import apiClient from '@/services/axiosInstance'
 import { API_ENDPOINTS } from '@/api/endpoints'
 
-const base = API_ENDPOINTS.ENDPOINTS.BASE
+const base = API_ENDPOINTS.EXPORT.BASE
 
 export default {
   exportSitesAsCsv() {

@@ -11,6 +11,8 @@ import siteRepository from '@/api/siteRepository'
 import { SCORE_THRESHOLDS, SUITABILITY_COLORS } from '@/constants/mapConstants'
 import exportRepository from '@/api/exportRepository'
 import { downloadFile } from '@/utils/file'
+import type { WeightRequest } from '@/types/analyze'
+import analyzeRepository from '@/api/analyzeRepository'
 
 export const useSiteStore = defineStore('sites', () => {
   // --- STATE ---
@@ -19,6 +21,7 @@ export const useSiteStore = defineStore('sites', () => {
   const error = ref<string | null>(null)
   const activePanels = ref<ActivePanel[]>([])
   const isExporting = ref<boolean>(false)
+  const weights = ref<WeightRequest>()
   const mapFilters = ref<SiteWithScoreFilter>({
     site_name: null,
     land_type: null,
@@ -44,6 +47,15 @@ export const useSiteStore = defineStore('sites', () => {
       console.error('Export failed:', error)
     } finally {
       isExporting.value = false
+    }
+  }
+
+  const recalculateWeights = async (payload: WeightRequest) => {
+    try {
+      const response = await analyzeRepository.recalculateWeights(payload)
+      return response
+    } catch (error) {
+      console.error('Recalculation Failed:', error)
     }
   }
 
@@ -163,6 +175,7 @@ export const useSiteStore = defineStore('sites', () => {
     loading,
     activePanels,
     mapFilters,
+    weights,
     isExporting,
     error,
     totalSites,
@@ -173,5 +186,6 @@ export const useSiteStore = defineStore('sites', () => {
     getScoreColor,
     removeRangeFilter,
     togglePanel,
+    recalculateWeights,
   }
 })

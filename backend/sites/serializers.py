@@ -223,14 +223,13 @@ class NewWeightSerializer(serializers.Serializer):
 
     def save_weights(self):
         """
-        Custom method to loop through validated data and 
-        upsert into the 'tall' AnalysisParameters table.
+        Corrected: Update the global weight parameters in the 'tall' table.
         """
         results = []
         for json_key, db_name in self.MAPPING.items():
             weight_val = self.validated_data.get(json_key)
             
-            # The "Upsert" logic
+            # Use AnalysisParameters (the weights table), not AnalysisResults (the scores table)
             obj, created = AnalysisParameters.objects.update_or_create(
                 parameter_name=db_name,
                 defaults={'weight_value': weight_val}

@@ -6,7 +6,10 @@ export const API_ENDPOINTS = {
   STATISTICS: {
     BASE: '/sites/statistics/',
   },
-  ENDPOINTS: {
-    BASE: '/sites/export/'
+  EXPORT: {
+    BASE: '/sites/export/',
+  },
+  ANALYZE: {
+    BASE: '/sites/analyze/',
   },
 }

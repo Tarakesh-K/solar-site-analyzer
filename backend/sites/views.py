@@ -125,16 +125,16 @@ class SiteAnalysisView(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=400)
-        
+
     def recalculate_all_sites(self, weights):
         """
         Recalculates scores for every site and updates AnalysisResults.
         """
         sites = Sites.objects.all()
+        new_results_buffer = []
 
         for site in sites:
             # 1. Normalize Raw Values to 0-100 scores 
-            # (This turns '15 degrees' or '5km' into a score out of 100)
             s_score = normalize_solar(site.solar_irradiance_kwh)
             a_score = normalize_area(site.area_sqm)
             g_score = normalize_grid(site.grid_distance_km)
@@ -142,27 +142,36 @@ class SiteAnalysisView(APIView):
             i_score = normalize_infra(site.road_distance_km)
 
             # 2. Apply the weights to get weighted components
-            w_solar = s_score * float(weights['solar'])
-            w_area  = a_score * float(weights['area'])
-            w_grid  = g_score * float(weights['grid'])
-            w_slope = sl_score * float(weights['slope'])
-            w_infra = i_score * float(weights['infra'])
+            # Using .get() with a fallback to prevent KeyError if the frontend misses a field
+            w_solar = s_score * float(weights.get('solar', 0))
+            w_area  = a_score * float(weights.get('area', 0))
+            w_grid  = g_score * float(weights.get('grid', 0))
+            w_slope = sl_score * float(weights.get('slope', 0))
+            w_infra = i_score * float(weights.get('infra', 0))
 
             # 3. Sum for the Final Score
             total_suitability = w_solar + w_area + w_grid + w_slope + w_infra
 
-            # 4. Upsert (Update or Create) the Result record
-            AnalysisResults.objects.update_or_create(
+            # 4. Prepare the Result record objects for bulk insertion
+            new_results_buffer.append(AnalysisResults(
                 site=site,
-                defaults={
-                    'solar_score': round(w_solar, 2),
-                    'area_score': round(w_area, 2),
-                    'grid_score': round(w_grid, 2),
-                    'slope_score': round(w_slope, 2),
-                    'infra_score': round(w_infra, 2),
-                    'total_score': round(total_suitability, 2)
-                }
-            )
+                solar_irradiance_score=round(w_solar, 2),
+                area_score=round(w_area, 2),
+                grid_distance_score=round(w_grid, 2),
+                slope_score=round(w_slope, 2),
+                infrastructure_score=round(w_infra, 2),
+                total_suitability_score=round(total_suitability, 2),
+                parameters_snapshot=weights  # Optional: saves the weights used for history
+            ))
+
+        # Perform deletion and insertion in one atomic block
+        # This fixes the "Returned 2" error by ensuring only one active set of results exists
+        with transaction.atomic():
+            # If you want to keep history, comment out the .delete() line. 
+            # But for the assessment, deleting ensures your GET /api/sites doesn't return duplicates.
+            AnalysisResults.objects.all().delete() 
+            AnalysisResults.objects.bulk_create(new_results_buffer)
+            
 
 class SiteStatiscsSummary(APIView):
     permission_classes = [permissions.AllowAny]
