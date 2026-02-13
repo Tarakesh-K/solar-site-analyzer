@@ -121,6 +121,7 @@ class SiteUploadView(APIView):
             return Response(data, status=status.HTTP_200_OK)
 
         except Exception as e:
+            print(e)
             # Keep the error handling here to catch database or logic issues
             return Response(
                 {"error": f"Failed to retrieve sites: {str(e)}"},

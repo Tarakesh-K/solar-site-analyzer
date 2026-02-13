@@ -7,14 +7,9 @@ export function useMapLogic() {
 
   const { sites, loading, error } = storeToRefs(siteStore)
 
-  const initMapData = async () => {
-    if (sites.value.length === 0) {
-      await siteStore.fetchSites()
-    }
-  }
-
   onMounted(() => {
-    initMapData()
+    console.log(1)
+    siteStore.sites.length === 0 && siteStore.fetchSites()
   })
 
   return {
@@ -22,7 +17,6 @@ export function useMapLogic() {
     loading,
     error,
     getScoreColor: siteStore.getScoreColor, // Pass the function through
-    refresh: siteStore.fetchSites,
     mapFilters: siteStore.mapFilters,
     setMapFilterValue: siteStore.setMapFilterValue,
     setActivePanels: siteStore.setActivePanels,

@@ -17,13 +17,14 @@ import analyzeRepository from '@/api/analyzeRepository'
 export const useSiteStore = defineStore('sites', () => {
   // --- STATE ---
   const sites = ref<SiteWithScores[]>([])
-  const loading = ref<boolean>(false)         // Specifically for initial fetches
-  const isProcessing = ref<boolean>(false)    // For Uploads/Recalculations
-  const isExporting = ref<boolean>(false)     // For CSV Exports
+  const loading = ref<boolean>(false) // Specifically for initial fetches
+  const isProcessing = ref<boolean>(false) // For Uploads/Recalculations
+  const isExporting = ref<boolean>(false) // For CSV Exports
   const error = ref<string | null>(null)
   const activePanels = ref<ActivePanel[]>([])
   const weights = ref<WeightRequest>()
-  
+  const hasFetched = ref(false)
+
   const mapFilters = ref<SiteWithScoreFilter>({
     site_name: null,
     land_type: null,
@@ -42,8 +43,6 @@ export const useSiteStore = defineStore('sites', () => {
     isProcessing.value = true
     try {
       const response = await siteRepository.uploadSiteFile(siteFile)
-      // Refresh sites so the map displays the newly uploaded data
-      await fetchSites()
       return response
     } catch (err) {
       console.error('Store: Upload failed', err)
@@ -90,18 +89,16 @@ export const useSiteStore = defineStore('sites', () => {
    * Standard fetch for the sites list.
    */
   async function fetchSites(queryParams?: string) {
+    if (hasFetched.value) return
+    hasFetched.value = true
+
     loading.value = true
     error.value = null
     try {
       const response = await siteRepository.getSites(queryParams)
       sites.value = response.data
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        error.value = err.message
-      } else {
-        error.value = 'An unexpected error occurred'
-      }
-      console.error('Fetch Error:', err)
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Unexpected error'
     } finally {
       loading.value = false
     }
