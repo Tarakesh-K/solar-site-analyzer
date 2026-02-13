@@ -15,7 +15,7 @@ const attribution = import.meta.env.VITE_SITE_MAP_ATTRIBUTION
 </script>
 
 <template>
-  <div class="h-screen p-4 relative">
+  <div class="bg-black h-screen p-4 relative">
     <l-map
       v-model:zoom="zoom"
       :center="center"

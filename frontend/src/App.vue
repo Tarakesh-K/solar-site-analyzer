@@ -28,7 +28,7 @@ const handleApplyFilters = async () => {
 </script>
 
 <template>
-  <main class="h-screen flex flex-col overflow-hidden relative">
+  <main class="h-screen bg-black flex flex-col overflow-hidden relative">
     <AppHeader @filters="toggleFilters" @applyFilters="handleApplyFilters" />
 
     <FilterDropdown v-if="isFilterOpen" @apply="handleApplyFilters" />

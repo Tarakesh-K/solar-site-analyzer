@@ -9,6 +9,8 @@ import type {
 } from '@/types/sites' // Note: Use singular 'Site' if it's one object
 import siteRepository from '@/api/siteRepository'
 import { SCORE_THRESHOLDS, SUITABILITY_COLORS } from '@/constants/mapConstants'
+import exportRepository from '@/api/exportRepository'
+import { downloadFile } from '@/utils/file'
 
 export const useSiteStore = defineStore('sites', () => {
   // --- STATE ---
@@ -16,6 +18,7 @@ export const useSiteStore = defineStore('sites', () => {
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)
   const activePanels = ref<ActivePanel[]>([])
+  const isExporting = ref<boolean>(false)
   const mapFilters = ref<SiteWithScoreFilter>({
     site_name: null,
     land_type: null,
@@ -24,6 +27,25 @@ export const useSiteStore = defineStore('sites', () => {
     offset: null,
     rangeExactFilter: [],
   })
+
+  const exportSites = async () => {
+    if (isExporting.value) return
+
+    isExporting.value = true
+    try {
+      const response = await exportRepository.exportSitesAsCsv()
+
+      // Create a timestamped filename
+      const filename = `solar-sites-${new Date().toISOString().slice(0, 10)}.csv`
+
+      // Trigger the utility
+      downloadFile(new Blob([response.data]), filename)
+    } catch (error) {
+      console.error('Export failed:', error)
+    } finally {
+      isExporting.value = false
+    }
+  }
 
   // --- GETTERS ---
   const totalSites = computed(() => sites.value.length)
@@ -141,11 +163,13 @@ export const useSiteStore = defineStore('sites', () => {
     loading,
     activePanels,
     mapFilters,
+    isExporting,
     error,
     totalSites,
     setMapFilterValue,
     setActivePanels,
     fetchSites,
+    exportSites,
     getScoreColor,
     removeRangeFilter,
     togglePanel,

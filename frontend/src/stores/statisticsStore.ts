@@ -1,24 +1,36 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Statistics } from '@/types/statistics'
+import statisticsRepository from '@/api/statisticsRepository'
 
 export const useStatisticsStore = defineStore('statistics', () => {
-  // State: This holds the raw data from your API
+  // State
   const statistics = ref<Statistics | null>(null)
   const isLoading = ref(false)
 
-  // Action: The fetcher
-  const fetchStatistics = async () => {
+  /**
+   * Action: Fetches stats using the centralized repository.
+   * Supports optional query params (like date ranges or site IDs).
+   */
+  const fetchStatistics = async (queryParams?: string) => {
     isLoading.value = true
     try {
-      // Replace with your actual axios/fetch call
-      const response = await fetch('')
-      const data: Statistics = await response.json()
-      statistics.value = data
+      // Using the service we just refactored
+      const response = await statisticsRepository.fetchStatistics(queryParams)
+      
+      // Axios stores the data in the .data property
+      statistics.value = response.data 
+    } catch (error) {
+      console.error('Failed to load dashboard statistics:', error)
+      // You could handle specific error states here (e.g., setting a global error ref)
     } finally {
       isLoading.value = false
     }
   }
 
-  return { statistics, isLoading, fetchStatistics }
+  return { 
+    statistics, 
+    isLoading, 
+    fetchStatistics 
+  }
 })

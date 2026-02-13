@@ -24,19 +24,8 @@ const currentContext = computed(() => {
       {{ currentContext }} Filters
     </h3>
 
-    <div v-if="currentContext === 'map'" class="space-y-4">
+    <div class="space-y-4">
       <MapFilters />
-    </div>
-
-    <div v-else-if="currentContext === 'dashboard'" class="space-y-4">
-      <div>
-        <label class="text-[10px] text-gray-400 block mb-1">DATE RANGE</label>
-        <select class="w-full bg-gray-900 border border-gray-700 text-xs p-2 rounded">
-          <option>Last 30 Days</option>
-          <option>Last Quarter</option>
-          <option>Year to Date</option>
-        </select>
-      </div>
     </div>
 
     <button

@@ -4,6 +4,9 @@ export const API_ENDPOINTS = {
     DETAILS: (id: number) => `/sites/${id}/`,
   },
   STATISTICS: {
-    BASE: '/statistics/',
+    BASE: '/sites/statistics/',
+  },
+  ENDPOINTS: {
+    BASE: '/sites/export/'
   },
 }
