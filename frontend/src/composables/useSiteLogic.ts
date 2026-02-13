@@ -8,7 +8,6 @@ export function useMapLogic() {
   const { sites, loading, error } = storeToRefs(siteStore)
 
   onMounted(() => {
-    console.log(1)
     siteStore.sites.length === 0 && siteStore.fetchSites()
   })
 

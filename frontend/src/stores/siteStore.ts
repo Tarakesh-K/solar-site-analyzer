@@ -23,7 +23,6 @@ export const useSiteStore = defineStore('sites', () => {
   const error = ref<string | null>(null)
   const activePanels = ref<ActivePanel[]>([])
   const weights = ref<WeightRequest>()
-  const hasFetched = ref(false)
 
   const mapFilters = ref<SiteWithScoreFilter>({
     site_name: null,
@@ -89,15 +88,13 @@ export const useSiteStore = defineStore('sites', () => {
    * Standard fetch for the sites list.
    */
   async function fetchSites(queryParams?: string) {
-    if (hasFetched.value) return
-    hasFetched.value = true
-
     loading.value = true
     error.value = null
     try {
       const response = await siteRepository.getSites(queryParams)
       sites.value = response.data
     } catch (err) {
+      console.error(err)
       error.value = err instanceof Error ? err.message : 'Unexpected error'
     } finally {
       loading.value = false

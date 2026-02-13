@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { useMapLogic } from '@/composables/useSiteLogic'
 import MapFilters from '@/components/reusable/header/filters/MapFilters.vue'
 
 const route = useRoute()
 defineEmits(['apply'])
-const {} = useMapLogic()
 
 // Determine which filter set to show based on the route path
 const currentContext = computed(() => {
