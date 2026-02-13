@@ -1,5 +1,11 @@
 from django.urls import path
-from sites.views import  SiteUploadView, SiteView, SiteAnalysisView, SiteStatiscsSummary, SiteExportSummary
+from sites.views import (
+    SiteUploadView,
+    SiteView,
+    SiteAnalysisView,
+    SiteStatiscsSummary,
+    SiteExportSummary,
+)
 
 urlpatterns = [
     path("", SiteUploadView.as_view(), name="upload-site"),

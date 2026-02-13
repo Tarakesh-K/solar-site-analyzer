@@ -5,24 +5,35 @@ from django.db import models
 from django.db.models import Q
 from sites.constants import ALLOWED_QUERY_PARAMS_FOR_SITE
 
+
 def get_allowed_columns(model):
     """
-    Returns a set of field names that are allowed for filtering 
+    Returns a set of field names that are allowed for filtering
     based on the specific model's schema.
     """
     return {
         field.name
         for field in model._meta.fields
-        if isinstance(field, (models.IntegerField, models.FloatField, models.DecimalField, models.DateTimeField))
+        if isinstance(
+            field,
+            (
+                models.IntegerField,
+                models.FloatField,
+                models.DecimalField,
+                models.DateTimeField,
+            ),
+        )
     }
+
 
 def extract_values_from_csv(io_string):
     # DictReader uses the first line as keys automatically
     dict_reader = csv.DictReader(io_string)
-    
+
     # Convert the reader object into a list of dictionaries
     # Each dictionary is { "header_name": "value" }
     return [row for row in dict_reader]
+
 
 def split_values_for_query_params(queries, model):
     result = []
@@ -61,7 +72,8 @@ def split_values_for_query_params(queries, model):
         result.append(data)
 
     return result
-    
+
+
 def filter_by_site_name(queryset, site_name_prefix):
     """
     Case-insensitive 'Starts With' match for site_name.
@@ -72,6 +84,7 @@ def filter_by_site_name(queryset, site_name_prefix):
         return queryset.filter(site_name__istartswith=site_name_prefix)
     return queryset
 
+
 def filter_by_land_type(queryset, land_type):
     """
     Exact match for land_type (e.g., 'Barren', 'Scrub').
@@ -79,6 +92,7 @@ def filter_by_land_type(queryset, land_type):
     if land_type:
         return queryset.filter(land_type__istartswith=land_type)
     return queryset
+
 
 def filter_by_region(queryset, region):
     """
@@ -88,35 +102,41 @@ def filter_by_region(queryset, region):
         return queryset.filter(region__istartswith=region)
     return queryset
 
+
 def build_score_filters(filters, combined_q=None):
     if combined_q is None:
         combined_q = Q()
-    
+
     for f in filters:
-        col = f.get('col')
+        col = f.get("col")
         if not col:
             continue
-            
+
         try:
-            if 'score' in f and ('min_score' in f or 'max_score' in f):
-                raise ValidationError({
-                    "filter_error": f"Column '{col}' cannot have 'score' combined with 'min_score' or 'max_score'."
-                })
-            if 'score' in f:
-                combined_q &= Q(**{f"{col}": f['score']})
+            if "score" in f and ("min_score" in f or "max_score" in f):
+                raise ValidationError(
+                    {
+                        "filter_error": f"Column '{col}' cannot have 'score' combined with 'min_score' or 'max_score'."
+                    }
+                )
+            if "score" in f:
+                combined_q &= Q(**{f"{col}": f["score"]})
             # We apply the filters to the Q object
-            if 'min_score' in f:
-                combined_q &= Q(**{f"{col}__gte": f['min_score']})
-            if 'max_score' in f:
-                combined_q &= Q(**{f"{col}__lte": f['max_score']}) 
+            if "min_score" in f:
+                combined_q &= Q(**{f"{col}__gte": f["min_score"]})
+            if "max_score" in f:
+                combined_q &= Q(**{f"{col}__lte": f["max_score"]})
         except Exception as e:
             # 🔹 Throwing ValidationError ensures the API user knows what went wrong
-            raise ValidationError({
-                "filter_error": f"Field '{col}' does not exist or has invalid data.",
-                "details": str(e)
-            })
-            
+            raise ValidationError(
+                {
+                    "filter_error": f"Field '{col}' does not exist or has invalid data.",
+                    "details": str(e),
+                }
+            )
+
     return combined_q
+
 
 def offset_and_limit_query_params(request):
     try:
@@ -131,6 +151,7 @@ def offset_and_limit_query_params(request):
     finally:
         return offset, limit
 
+
 def limit_and_offset_queries(queryset, limit, offset):
     if limit is not None and offset is not None:
         # SQL: SELECT ... LIMIT {limit} OFFSET {offset}
@@ -144,6 +165,7 @@ def limit_and_offset_queries(queryset, limit, offset):
         sites = queryset.all()
     return sites
 
+
 def try_numeric_conversion(value):
     """Attempt to convert string to float or int; return original if not possible."""
     try:
@@ -154,26 +176,36 @@ def try_numeric_conversion(value):
     except (ValueError, TypeError):
         return value
 
+
 def normalize_solar(value):
     # Higher is better. Range: 3.0 (score 0) to 6.0 (score 100)
     val = float(value)
-    if val >= 6.0: return 100
-    if val <= 3.0: return 0
+    if val >= 6.0:
+        return 100
+    if val <= 3.0:
+        return 0
     return (val - 3.0) / (6.0 - 3.0) * 100
+
 
 def normalize_slope(value):
     # Lower is better. Range: 0 deg (score 100) to 15 deg (score 0)
     val = float(value)
-    if val <= 0: return 100
-    if val >= 15: return 0
+    if val <= 0:
+        return 100
+    if val >= 15:
+        return 0
     return (15 - val) / 15 * 100
+
 
 def normalize_grid(value):
     # Lower is better. Range: 0km (score 100) to 10km (score 0)
     val = float(value)
-    if val <= 0: return 100
-    if val >= 10: return 0
+    if val <= 0:
+        return 100
+    if val >= 10:
+        return 0
     return (10 - val) / 10 * 100
+
 
 def normalize_area(value):
     """
@@ -183,14 +215,15 @@ def normalize_area(value):
     val = float(value)
     min_area = 10000
     max_area = 100000
-    
+
     if val >= max_area:
         return 100
     if val <= min_area:
         return 0
-        
+
     # Linear Interpolation Formula: (Current - Min) / (Max - Min) * 100
     return ((val - min_area) / (max_area - min_area)) * 100
+
 
 def normalize_infra(value):
     """
@@ -198,24 +231,25 @@ def normalize_infra(value):
     Range: 0 km (Score 100) to 10 km (Score 0).
     """
     val = float(value)
-    max_dist = 10.0 # 10 km threshold
-    
+    max_dist = 10.0  # 10 km threshold
+
     if val <= 0:
         return 100
     if val >= max_dist:
         return 0
-        
+
     # Inverse Linear Interpolation: (Max - Current) / Max * 100
     return ((max_dist - val) / max_dist) * 100
+
 
 def get_filtered_site_data(request, model, serializer_class):
     """
     Logic-only helper to filter and serialize site data.
     """
     queries = request.query_params.getlist("q")
-    site_name = request.query_params.get('site_name')
-    land_type = request.query_params.get('land_type')
-    region = request.query_params.get('region')
+    site_name = request.query_params.get("site_name")
+    land_type = request.query_params.get("land_type")
+    region = request.query_params.get("region")
 
     # Apply your custom filter logic
     filters = split_values_for_query_params(queries, model)
@@ -236,12 +270,13 @@ def get_filtered_site_data(request, model, serializer_class):
     serializer = serializer_class(sites, many=True)
     return serializer.data
 
+
 def export_to_csv_response(data, filename="solar_sites_summary.csv"):
     # Create the response object
-    response = HttpResponse(content_type='text/csv')
-    
+    response = HttpResponse(content_type="text/csv")
+
     # This line is CRITICAL for triggering a download
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
 
     if not data:
         return response

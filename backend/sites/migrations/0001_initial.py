@@ -7,31 +7,68 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Sites',
+            name="Sites",
             fields=[
-                ('site_id', models.AutoField(primary_key=True, serialize=False)),
-                ('site_name', models.CharField(max_length=255)),
-                ('latitude', models.DecimalField(decimal_places=7, max_digits=10)),
-                ('longitude', models.DecimalField(decimal_places=7, max_digits=10)),
-                ('area_sqm', models.IntegerField()),
-                ('solar_irradiance_kwh', models.DecimalField(decimal_places=2, help_text='Average daily solar irradiance in kWh/m²/day', max_digits=4)),
-                ('grid_distance_km', models.DecimalField(decimal_places=2, help_text='Distance to nearest power grid in km', max_digits=5)),
-                ('slope_degrees', models.DecimalField(decimal_places=2, help_text='Terrain slope in degrees', max_digits=4)),
-                ('road_distance_km', models.DecimalField(decimal_places=2, help_text='Distance to nearest road in km', max_digits=5)),
-                ('elevation_m', models.IntegerField(help_text='Elevation above sea level in meters')),
-                ('land_type', models.CharField(max_length=50)),
-                ('region', models.CharField(max_length=100)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                ("site_id", models.AutoField(primary_key=True, serialize=False)),
+                ("site_name", models.CharField(max_length=255)),
+                ("latitude", models.DecimalField(decimal_places=7, max_digits=10)),
+                ("longitude", models.DecimalField(decimal_places=7, max_digits=10)),
+                ("area_sqm", models.IntegerField()),
+                (
+                    "solar_irradiance_kwh",
+                    models.DecimalField(
+                        decimal_places=2,
+                        help_text="Average daily solar irradiance in kWh/m²/day",
+                        max_digits=4,
+                    ),
+                ),
+                (
+                    "grid_distance_km",
+                    models.DecimalField(
+                        decimal_places=2,
+                        help_text="Distance to nearest power grid in km",
+                        max_digits=5,
+                    ),
+                ),
+                (
+                    "slope_degrees",
+                    models.DecimalField(
+                        decimal_places=2,
+                        help_text="Terrain slope in degrees",
+                        max_digits=4,
+                    ),
+                ),
+                (
+                    "road_distance_km",
+                    models.DecimalField(
+                        decimal_places=2,
+                        help_text="Distance to nearest road in km",
+                        max_digits=5,
+                    ),
+                ),
+                (
+                    "elevation_m",
+                    models.IntegerField(
+                        help_text="Elevation above sea level in meters"
+                    ),
+                ),
+                ("land_type", models.CharField(max_length=50)),
+                ("region", models.CharField(max_length=100)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'db_table': 'sites',
-                'indexes': [models.Index(fields=['latitude'], name='sites_latitud_2e1968_idx'), models.Index(fields=['longitude'], name='sites_longitu_80de2b_idx'), models.Index(fields=['region'], name='sites_region_d6bd6c_idx'), models.Index(fields=['land_type'], name='sites_land_ty_1f164a_idx')],
+                "db_table": "sites",
+                "indexes": [
+                    models.Index(fields=["latitude"], name="sites_latitud_2e1968_idx"),
+                    models.Index(fields=["longitude"], name="sites_longitu_80de2b_idx"),
+                    models.Index(fields=["region"], name="sites_region_d6bd6c_idx"),
+                    models.Index(fields=["land_type"], name="sites_land_ty_1f164a_idx"),
+                ],
             },
         ),
     ]
