@@ -3,15 +3,17 @@ import { ref } from 'vue'
 import WeightInput from '@/components/analyze/WeightInput.vue'
 import { useSiteStore } from '@/stores/siteStore'
 import { Settings2, RefreshCcw, CheckCircle2 } from 'lucide-vue-next'
+import type { Weights } from '@/types/analyze'
+import { ANALYSIS_WEIGHTS_CONFIG } from '@/constants/analyzeConstants'
 
 const siteStore = useSiteStore()
 
-const form = ref({
-  solar: 0.35,
-  area: 0.25,
-  grid: 0.2,
-  slope: 0.15,
-  infra: 0.05,
+const form = ref<Weights>({
+  solar: 0,
+  area: 0,
+  grid: 0,
+  slope: 0,
+  infra: 0,
 })
 
 const isProcessing = ref(false)
@@ -46,6 +48,20 @@ const handleRecalculate = async () => {
     isProcessing.value = false
   }
 }
+
+const handleReset = () => {
+  try {
+    form.value = {
+      solar: 0,
+      area: 0,
+      grid: 0,
+      slope: 0,
+      infra: 0,
+    }
+  } catch (error) {
+    console.error('Error While resetting state', error)
+  }
+}
 </script>
 
 <template>
@@ -74,29 +90,41 @@ const handleRecalculate = async () => {
     </Transition>
 
     <div
-      class="w-full max-w-md bg-zinc-950 border border-zinc-900 rounded-2xl p-8 shadow-2xl mt-12"
+      class="w-full relative max-w-md bg-zinc-950 border border-zinc-900 rounded-2xl p-8 shadow-2xl mt-12"
     >
+      <div class="w-max absolute top-0 right-0 m-4">
+        <button
+          @click="handleReset"
+          :disabled="isProcessing"
+          class="flex items-center justify-center gap-2 bg-blue-500/10 hover:bg-zinc-600 text-white font-bold py-2 px-4 rounded-xl transition-all text-xs"
+        >
+          <RefreshCcw :class="{ 'animate-spin': isProcessing }" :size="14" />
+          RESET
+        </button>
+      </div>
       <div class="flex items-center gap-3 mb-8">
         <div class="p-2 bg-blue-500/10 rounded-lg">
           <Settings2 class="text-blue-500" :size="20" />
         </div>
         <h2 class="text-lg font-semibold tracking-tight">Analysis Parameters</h2>
       </div>
-
-      <div class="grid grid-cols-2 gap-3">
-        <WeightInput label="Solar Irradiance" v-model="form.solar" />
-        <WeightInput label="Available Area" v-model="form.area" />
-        <WeightInput label="Grid Distance" v-model="form.grid" />
-        <WeightInput label="Terrain Slope" v-model="form.slope" />
-        <WeightInput label="Infrastructure" v-model="form.infra" class="col-span-2" />
+      <div class="grid grid-cols-2 gap-4">
+        <WeightInput
+          v-for="config in ANALYSIS_WEIGHTS_CONFIG"
+          :key="config.id"
+          :label="config.label"
+          :icon="config.icon"
+          :width="config.width"
+          v-model="form[config.id]"
+        />
 
         <button
           @click="handleRecalculate"
           :disabled="isProcessing"
-          class="col-span-2 mt-4 w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20"
+          class="col-span-2 mt-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2"
         >
           <RefreshCcw :class="{ 'animate-spin': isProcessing }" :size="18" />
-          {{ isProcessing ? 'RECALCULATING...' : 'RECALCULATE WEIGHTS' }}
+          {{ isProcessing ? 'RECALCULATING...' : 'APPLY WEIGHTS' }}
         </button>
       </div>
 

@@ -33,7 +33,7 @@ export const HOME_NAVBAR_CONSTANTS = [
     icon: Microscope,
   },
   {
-    value: 'Site Upload',
+    value: 'Site Upload/Update',
     route: '/site-upload',
     icon: Download,
   },
