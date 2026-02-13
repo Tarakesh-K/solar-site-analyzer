@@ -7,3 +7,11 @@ export type RangeExactInputT = {
   label: string
   shortLabel: string
 }
+
+export type SearchInputT = {
+  column: SearchT
+  label: string
+  placeholder: string
+}
+
+export type SearchT = 'site_name' | 'region' | 'land_type' | 'limit' | 'offset'

@@ -43,7 +43,7 @@ const currentContext = computed(() => {
       @click="$emit('apply')"
       class="w-full mt-6 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-2 rounded transition-colors"
     >
-      APPLY CONFIGURATION
+      APPLY FILTERS
     </button>
   </div>
 </template>

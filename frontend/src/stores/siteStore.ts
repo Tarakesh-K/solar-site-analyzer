@@ -1,6 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { RangeExactFilter, SiteWithScoreFilter, SiteWithScores } from '@/types/sites' // Note: Use singular 'Site' if it's one object
+import type {
+  ActivePanel,
+  NumericSiteColumns,
+  RangeExactFilter,
+  SiteWithScoreFilter,
+  SiteWithScores,
+} from '@/types/sites' // Note: Use singular 'Site' if it's one object
 import siteRepository from '@/api/siteRepository'
 import { SCORE_THRESHOLDS, SUITABILITY_COLORS } from '@/constants/mapConstants'
 
@@ -9,6 +15,7 @@ export const useSiteStore = defineStore('sites', () => {
   const sites = ref<SiteWithScores[]>([])
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)
+  const activePanels = ref<ActivePanel[]>([])
   const mapFilters = ref<SiteWithScoreFilter>({
     site_name: null,
     land_type: null,
@@ -45,6 +52,7 @@ export const useSiteStore = defineStore('sites', () => {
         score: incoming.score!,
         min_score: null,
         max_score: null,
+        mode: incoming.mode,
       }
     } else {
       update = {
@@ -52,6 +60,7 @@ export const useSiteStore = defineStore('sites', () => {
         score: null,
         min_score: incoming.min_score ?? existing?.min_score ?? null,
         max_score: incoming.max_score ?? existing?.max_score ?? null,
+        mode: incoming.mode,
       }
     }
 
@@ -62,12 +71,48 @@ export const useSiteStore = defineStore('sites', () => {
     }
   }
 
+  const removeRangeFilter = (column: NumericSiteColumns) => {
+    if (mapFilters.value.rangeExactFilter) {
+      mapFilters.value.rangeExactFilter = mapFilters.value.rangeExactFilter.filter(
+        (f) => f.col !== column,
+      )
+    }
+  }
+
+  // --- SETTERS ---
+  const setActivePanels = (panel: ActivePanel) => {
+    activePanels.value = [...new Set([...activePanels.value, panel])]
+  }
+
+  const togglePanel = (panel: ActivePanel) => {
+    const index = activePanels.value.indexOf(panel)
+
+    if (index !== -1) {
+      activePanels.value.splice(index, 1)
+
+      if (panel === 'analytical') {
+        mapFilters.value.rangeExactFilter = []
+      }
+      if (panel === 'search') {
+        mapFilters.value.site_name = null
+        mapFilters.value.region = null
+        mapFilters.value.land_type = null
+      }
+      if (panel === 'system') {
+        mapFilters.value.limit = null
+        mapFilters.value.offset = null
+      }
+    } else {
+      activePanels.value.push(panel)
+    }
+  }
+
   // --- ACTIONS ---
-  async function fetchSites() {
+  async function fetchSites(queryParams?: string) {
     loading.value = true
     error.value = null
     try {
-      const response = await siteRepository.getSites()
+      const response = await siteRepository.getSites(queryParams)
       sites.value = response.data
     } catch (err: unknown) {
       // Narrow the type from unknown to Error
@@ -91,20 +136,18 @@ export const useSiteStore = defineStore('sites', () => {
     return SUITABILITY_COLORS.POOR
   }
 
-  // --- RESET ACTION (Good practice) ---
-  function clearSites() {
-    sites.value = []
-  }
-
   return {
     sites,
     loading,
+    activePanels,
     mapFilters,
     error,
     totalSites,
-    fetchSites,
-    clearSites,
-    getScoreColor,
     setMapFilterValue,
+    setActivePanels,
+    fetchSites,
+    getScoreColor,
+    removeRangeFilter,
+    togglePanel,
   }
 })

@@ -7,8 +7,9 @@ const apiClient = axios.create({
 
 export default {
   // Centralized API logic
-  getSites() {
-    return apiClient.get<SiteWithScores[]>('/sites')
+  getSites(queryParams?: string) {
+    const url = queryParams ? `/sites/?${queryParams}` : '/sites/'
+    return apiClient.get<SiteWithScores[]>(url)
   },
 
   getSiteById(site_id: number) {

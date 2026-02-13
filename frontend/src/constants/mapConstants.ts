@@ -1,4 +1,4 @@
-import type { RangeExactInputT } from '@/types/header'
+import type { RangeExactInputT, SearchInputT } from '@/types/header'
 
 export const SUITABILITY_COLORS = {
   EXCELLENT: '#15803d',
@@ -81,5 +81,36 @@ export const RANGE_EXACT_COLUMNS_FOR_SITES: RangeExactInputT[] = [
     column: 'slope_score',
     label: 'Slope',
     shortLabel: 'slope',
+  },
+]
+
+export const SEARCH_EXACT_COLUMNS_FOR_SITES: SearchInputT[] = [
+  {
+    column: 'site_name',
+    label: 'Site Name',
+    placeholder: 'Search by name...',
+  },
+  {
+    column: 'region',
+    label: 'Region',
+    placeholder: 'Enter region...',
+  },
+  {
+    column: 'land_type',
+    label: 'Land Type',
+    placeholder: 'Enter land type...',
+  },
+]
+
+export const RANGE_LIMIT_FOR_SITES: SearchInputT[] = [
+  {
+    column: 'limit',
+    label: 'Limit',
+    placeholder: 'Filter by limit',
+  },
+  {
+    column: 'offset',
+    label: 'Offset',
+    placeholder: 'Starting site',
   },
 ]

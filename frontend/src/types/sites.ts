@@ -57,5 +57,7 @@ export type RangeExactFilter = {
   max_score?: number | null
   min_score?: number | null
   score?: number | null
-  mode?: FilterMode
+  mode: FilterMode
 }
+
+export type ActivePanel = 'search' | 'analytical' | 'system'

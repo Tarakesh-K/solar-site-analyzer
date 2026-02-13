@@ -25,5 +25,7 @@ export function useMapLogic() {
     refresh: siteStore.fetchSites,
     mapFilters: siteStore.mapFilters,
     setMapFilterValue: siteStore.setMapFilterValue,
+    setActivePanels: siteStore.setActivePanels,
+    fetchSites: siteStore.fetchSites,
   }
 }

@@ -77,7 +77,7 @@ def filter_by_land_type(queryset, land_type):
     Exact match for land_type (e.g., 'Barren', 'Scrub').
     """
     if land_type:
-        return queryset.filter(land_type__exact=land_type)
+        return queryset.filter(land_type__istartswith=land_type)
     return queryset
 
 def filter_by_region(queryset, region):
@@ -85,7 +85,7 @@ def filter_by_region(queryset, region):
     Exact match for region/state.
     """
     if region:
-        return queryset.filter(region__iexact=region)
+        return queryset.filter(region__istartswith=region)
     return queryset
 
 def build_score_filters(filters, combined_q=None):

@@ -6,26 +6,30 @@ import NavBar from '@/components/reusable/navbar/NavBar.vue'
 import AppHeader from '@/components/reusable/header/AppHeader.vue'
 import FilterDropdown from '@/components/reusable/header/FilterDropdown.vue'
 import { useMapLogic } from '@/composables/useSiteLogic'
+import { queryParamsBuilder } from './utils/queryParams'
+import { useEventListener } from '@vueuse/core'
 
-const { mapFilters } = useMapLogic()
+const { mapFilters, fetchSites } = useMapLogic()
 const isFilterOpen = ref(false)
-const handleReset = () => {
-  console.log('Reset')
-}
 
 const toggleFilters = () => {
   isFilterOpen.value = !isFilterOpen.value
 }
 
-const handleApplyFilters = () => {
-  console.log('mapFilters', mapFilters)
+useEventListener(window, 'keydown', (e) => {
+  if (e.key === 'Escape') isFilterOpen.value = false
+})
+
+const handleApplyFilters = async () => {
+  const queryParams = queryParamsBuilder(mapFilters)
+  await fetchSites(queryParams)
   isFilterOpen.value = false // Close after applying
 }
 </script>
 
 <template>
   <main class="h-screen flex flex-col overflow-hidden relative">
-    <AppHeader @reset="handleReset" @filters="toggleFilters" @applyFilters="handleApplyFilters" />
+    <AppHeader @filters="toggleFilters" @applyFilters="handleApplyFilters" />
 
     <FilterDropdown v-if="isFilterOpen" @apply="handleApplyFilters" />
 

@@ -1,0 +1,1 @@
+export type InputFilterT = string | number | null 
