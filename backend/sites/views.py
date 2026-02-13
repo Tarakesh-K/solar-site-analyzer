@@ -242,9 +242,7 @@ class SiteStatiscsSummary(APIView):
                     "total_sites": sites.count(),
                 },
                 "stats": stats,
-                "site_data": {
-                    "site_scoring_system": site_scoring_system,
-                },
+                "site_data": site_scoring_system,
             }, status=200)
         
         except Exception as e:
