@@ -6,7 +6,7 @@ import type {
   RangeExactFilter,
   SiteWithScoreFilter,
   SiteWithScores,
-} from '@/types/sites' // Note: Use singular 'Site' if it's one object
+} from '@/types/sites'
 import siteRepository from '@/api/siteRepository'
 import { SCORE_THRESHOLDS, SUITABILITY_COLORS } from '@/constants/mapConstants'
 import exportRepository from '@/api/exportRepository'
@@ -17,11 +17,13 @@ import analyzeRepository from '@/api/analyzeRepository'
 export const useSiteStore = defineStore('sites', () => {
   // --- STATE ---
   const sites = ref<SiteWithScores[]>([])
-  const loading = ref<boolean>(false)
+  const loading = ref<boolean>(false)         // Specifically for initial fetches
+  const isProcessing = ref<boolean>(false)    // For Uploads/Recalculations
+  const isExporting = ref<boolean>(false)     // For CSV Exports
   const error = ref<string | null>(null)
   const activePanels = ref<ActivePanel[]>([])
-  const isExporting = ref<boolean>(false)
   const weights = ref<WeightRequest>()
+  
   const mapFilters = ref<SiteWithScoreFilter>({
     site_name: null,
     land_type: null,
@@ -31,38 +33,84 @@ export const useSiteStore = defineStore('sites', () => {
     rangeExactFilter: [],
   })
 
+  // --- ACTIONS: DATA MANAGEMENT ---
+
+  /**
+   * Uploads a CSV file to the backend and refreshes the map data.
+   */
+  const siteFileUpload = async (siteFile: File) => {
+    isProcessing.value = true
+    try {
+      const response = await siteRepository.uploadSiteFile(siteFile)
+      // Refresh sites so the map displays the newly uploaded data
+      await fetchSites()
+      return response
+    } catch (err) {
+      console.error('Store: Upload failed', err)
+      throw err // Let the component handle the UI notification
+    } finally {
+      isProcessing.value = false
+    }
+  }
+
+  /**
+   * Recalculates suitability scores across all sites based on new weights.
+   */
+  const recalculateWeights = async (payload: WeightRequest) => {
+    isProcessing.value = true
+    try {
+      const response = await analyzeRepository.recalculateWeights(payload)
+      return response
+    } catch (err) {
+      console.error('Store: Recalculation Failed:', err)
+      throw err
+    } finally {
+      isProcessing.value = false
+    }
+  }
+
+  /**
+   * Exports the current site data as a CSV file.
+   */
   const exportSites = async () => {
     if (isExporting.value) return
-
     isExporting.value = true
     try {
       const response = await exportRepository.exportSitesAsCsv()
-
-      // Create a timestamped filename
       const filename = `solar-sites-${new Date().toISOString().slice(0, 10)}.csv`
-
-      // Trigger the utility
       downloadFile(new Blob([response.data]), filename)
-    } catch (error) {
-      console.error('Export failed:', error)
+    } catch (err) {
+      console.error('Export failed:', err)
     } finally {
       isExporting.value = false
     }
   }
 
-  const recalculateWeights = async (payload: WeightRequest) => {
+  /**
+   * Standard fetch for the sites list.
+   */
+  async function fetchSites(queryParams?: string) {
+    loading.value = true
+    error.value = null
     try {
-      const response = await analyzeRepository.recalculateWeights(payload)
-      return response
-    } catch (error) {
-      console.error('Recalculation Failed:', error)
+      const response = await siteRepository.getSites(queryParams)
+      sites.value = response.data
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'An unexpected error occurred'
+      }
+      console.error('Fetch Error:', err)
+    } finally {
+      loading.value = false
     }
   }
 
   // --- GETTERS ---
   const totalSites = computed(() => sites.value.length)
 
-  // --- MUTATIONS ---
+  // --- MUTATIONS / FILTER LOGIC ---
   const setMapFilterValue = <K extends keyof SiteWithScoreFilter>(
     key: K,
     value: SiteWithScoreFilter[K] | RangeExactFilter,
@@ -113,20 +161,11 @@ export const useSiteStore = defineStore('sites', () => {
     }
   }
 
-  // --- SETTERS ---
-  const setActivePanels = (panel: ActivePanel) => {
-    activePanels.value = [...new Set([...activePanels.value, panel])]
-  }
-
   const togglePanel = (panel: ActivePanel) => {
     const index = activePanels.value.indexOf(panel)
-
     if (index !== -1) {
       activePanels.value.splice(index, 1)
-
-      if (panel === 'analytical') {
-        mapFilters.value.rangeExactFilter = []
-      }
+      if (panel === 'analytical') mapFilters.value.rangeExactFilter = []
       if (panel === 'search') {
         mapFilters.value.site_name = null
         mapFilters.value.region = null
@@ -141,25 +180,8 @@ export const useSiteStore = defineStore('sites', () => {
     }
   }
 
-  // --- ACTIONS ---
-  async function fetchSites(queryParams?: string) {
-    loading.value = true
-    error.value = null
-    try {
-      const response = await siteRepository.getSites(queryParams)
-      sites.value = response.data
-    } catch (err: unknown) {
-      // Narrow the type from unknown to Error
-      if (err instanceof Error) {
-        error.value = err.message
-      } else {
-        error.value = 'An unexpected error occurred'
-      }
-
-      console.error('Fetch Error:', err)
-    } finally {
-      loading.value = false
-    }
+  const setActivePanels = (panel: ActivePanel) => {
+    activePanels.value = [...new Set([...activePanels.value, panel])]
   }
 
   const getScoreColor = (score: number): string => {
@@ -171,21 +193,27 @@ export const useSiteStore = defineStore('sites', () => {
   }
 
   return {
+    // State
     sites,
     loading,
+    isProcessing,
+    isExporting,
+    error,
     activePanels,
     mapFilters,
     weights,
-    isExporting,
-    error,
+    // Computed
     totalSites,
-    setMapFilterValue,
-    setActivePanels,
+    // Actions
     fetchSites,
+    siteFileUpload,
+    recalculateWeights,
     exportSites,
-    getScoreColor,
+    // Helpers
+    setMapFilterValue,
     removeRangeFilter,
     togglePanel,
-    recalculateWeights,
+    setActivePanels,
+    getScoreColor,
   }
 })

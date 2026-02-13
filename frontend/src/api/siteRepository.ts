@@ -15,4 +15,15 @@ export default {
   getSiteById(siteId: number) {
     return apiClient.get<SiteWithScores>(API_ENDPOINTS.SITES.DETAILS(siteId))
   },
+
+  uploadSiteFile(payload: File) {
+    // Check if your endpoint for upload is just 'base' or 'base/upload/'
+    const url = base
+
+    const formData = new FormData()
+    // 'site_file' is the key your Django backend will look for in request.FILES
+    formData.append('site_file', payload)
+
+    return apiClient.post(url, formData)
+  },
 }

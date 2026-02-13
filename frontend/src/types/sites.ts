@@ -61,3 +61,7 @@ export type RangeExactFilter = {
 }
 
 export type ActivePanel = 'search' | 'analytical' | 'system'
+
+export interface SiteUploadRequest {
+  site_file: File
+}

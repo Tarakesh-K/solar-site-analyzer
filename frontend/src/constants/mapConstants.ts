@@ -1,5 +1,5 @@
 import type { RangeExactInputT, SearchInputT } from '@/types/header'
-import { Map, LayoutDashboard, Microscope } from 'lucide-vue-next'
+import { Map, LayoutDashboard, Microscope, Download } from 'lucide-vue-next'
 
 export const SUITABILITY_COLORS = {
   EXCELLENT: '#15803d',
@@ -31,6 +31,11 @@ export const HOME_NAVBAR_CONSTANTS = [
     value: 'Analyze',
     route: '/analyze',
     icon: Microscope,
+  },
+  {
+    value: 'Site Upload',
+    route: '/site-upload',
+    icon: Download,
   },
 ]
 

@@ -18,8 +18,14 @@ const router = createRouter({
     {
       path: '/analyze',
       name: 'analyze',
-      // TRULY LAZY LOADED: Only downloads when user clicks "Dashboard"
+      // TRULY LAZY LOADED: Only downloads when user clicks "Analyze1"
       component: () => import('@/components/analyze/AnalyzeView.vue'),
+    },
+    {
+      path: '/site-upload',
+      name: 'siteUpload',
+      // TRULY LAZY LOADED: Only downloads when user clicks "SiteUpload"
+      component: () => import('@/components/siteUpload/SiteUpload.vue'),
     },
   ],
 })
