@@ -6,7 +6,6 @@ from rest_framework import status, permissions
 from sites.serializers import (
     CalculatedAnalysisSerializer,
     SiteDetailSerializer,
-    SiteListSerializer,
     SiteSerializer,
     NewWeightSerializer,
     SiteWithScoreSerializer,
